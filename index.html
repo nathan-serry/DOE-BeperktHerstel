@@ -674,7 +674,7 @@
 
     for (let i = 0; i < TOTAL; i++) {
       const img = new Image();
-      img.src   = `./${String(FIRST + i).padStart(4, '0')}.png`;
+      img.src   = `./imgs/${String(FIRST + i).padStart(4, '0')}.png`;
       frames[i] = img;
       img.onload = img.onerror = () => {
         loadedCount++;
