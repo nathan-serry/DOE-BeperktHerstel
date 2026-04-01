@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Oplossing - DOE</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --bg: #e9e3d6;
@@ -23,303 +21,71 @@
       min-height: 100vh;
       background: var(--bg);
       color: var(--ink);
-      font-family: "DM Mono", monospace;
+      font-family: monospace;
       padding: 16px;
     }
 
-    a { color: inherit; text-decoration: none; }
-
     .shell {
-      width: min(1180px, 100%);
+      width: min(800px, 100%);
       margin: 0 auto;
       border: 1px solid var(--line);
-      background: rgba(244, 239, 228, 0.84);
+      background: var(--paper);
     }
-
-    .topbar, .content, .footer { padding-left: 28px; padding-right: 28px; }
 
     .topbar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 24px;
-      padding-top: 22px;
-      padding-bottom: 22px;
+      padding: 20px;
       border-bottom: 1px solid var(--line);
-    }
-
-    .brand {
-      font-family: "Syne", sans-serif;
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-    }
-
-    .back {
-      color: var(--muted);
-      font-size: 0.76rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
     }
 
     .content {
-      padding-top: 56px;
-      padding-bottom: 72px;
-      display: grid;
-      gap: 24px;
-    }
-
-    .kicker {
-      color: var(--accent);
-      font-size: 0.74rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
+      padding: 30px;
     }
 
     h1 {
-      max-width: 12ch;
-      font-family: "Syne", sans-serif;
-      font-size: clamp(2.6rem, 5vw, 4rem);
-      line-height: 0.98;
-      letter-spacing: -0.05em;
-      text-transform: uppercase;
+      margin-bottom: 20px;
+      font-size: 2rem;
     }
 
-    p {
-      max-width: 840px;
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.95;
-    }
-
-    .animation-box {
-      position: relative;
-      min-height: 460px;
-      padding: 28px;
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 12px;
+      font-size: 1rem;
       border: 1px solid var(--line);
-      background: #17130e;
-      overflow: hidden;
-    }
-
-    .animation-box::before {
-      content: "DOE-03 · 3D weergave";
-      position: absolute;
-      top: 18px;
-      left: 20px;
-      color: rgba(255, 255, 255, 0.34);
-      font-size: 0.68rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    .animation-box::after {
-      content: "Modulaire onderdelen in beeld";
-      position: absolute;
-      right: 20px;
-      bottom: 18px;
-      color: rgba(255, 255, 255, 0.28);
-      font-size: 0.68rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    .animation-box img {
-      display: block;
-      width: min(100%, 780px);
-      margin: 0 auto;
-      object-fit: contain;
-    }
-
-    .caption {
-      color: var(--muted);
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .caption strong {
-      color: var(--accent);
-    }
-
-    .module-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.18);
-    }
-
-    .module-card {
-      display: grid;
-      gap: 10px;
-      padding: 22px 18px 18px;
-      border-right: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .module-card:nth-child(3n) { border-right: 0; }
-    .module-card:nth-last-child(-n + 3) { border-bottom: 0; }
-
-    .module-id {
-      color: var(--accent);
-      font-size: 0.68rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    .module-name {
-      font-family: "Syne", sans-serif;
-      font-size: 1.08rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .module-copy {
-      color: var(--muted);
-      font-size: 0.79rem;
-      line-height: 1.8;
-    }
-
-    .panel {
-      padding: 22px;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.24);
-      max-width: 840px;
-    }
-
-    .panel strong {
-      display: block;
-      margin-bottom: 10px;
-      font-family: "Syne", sans-serif;
-      text-transform: uppercase;
-      letter-spacing: -0.03em;
+      resize: vertical;
+      font-family: monospace;
     }
 
     .footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      padding-top: 26px;
-      padding-bottom: 26px;
+      padding: 15px;
       border-top: 1px solid var(--line);
+      font-size: 0.7rem;
+      text-align: center;
       color: var(--muted);
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .footer-left,
-    .footer-right {
-      white-space: nowrap;
-    }
-
-    @media (max-width: 860px) {
-      .module-grid { grid-template-columns: 1fr; }
-      .module-card { border-right: 0 !important; border-bottom: 1px solid var(--line) !important; }
-      .module-card:last-child { border-bottom: 0 !important; }
-      .animation-box { min-height: 320px; padding: 42px 14px 28px; }
-      .footer {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .footer-left,
-      .footer-right {
-        white-space: normal;
-      }
     }
   </style>
 </head>
+
 <body>
   <div class="shell">
+
     <header class="topbar">
-      <a class="brand" href="index.html">DOE</a>
-      <a class="back" href="index.html#timeline-oplossing">Terug naar tijdlijn</a>
+      <span>DOE</span>
+      <a href="index.html">Terug</a>
     </header>
 
     <main class="content">
-      <span class="kicker">Pagina 2</span>
-      <h1>De oplossing</h1>
-      <div class="animation-box">
-        <img id="solution-frame" src="imgs/0500.png" alt="Geanimeerde modulaire laptop" />
-      </div>
-      <div class="caption">Frame <strong id="solution-frame-count">01</strong> / 40</div>
-      <p>
-        Een modulaire laptop behandelt onderdelen als zelfstandige componenten in plaats van als permanente delen van een gesloten behuizing. Geheugen, opslag, batterij en poorten kunnen dan vervangen of geüpdatet worden zonder gespecialiseerd atelier of volledige demontage.
-      </p>
-      <div class="module-grid">
-        <article class="module-card">
-          <span class="module-id">MOD 01</span>
-          <h3 class="module-name">Processor</h3>
-          <p class="module-copy">Gesockelde chip die vervangbaar blijft zonder het volledige moederbord af te schrijven.</p>
-        </article>
-        <article class="module-card">
-          <span class="module-id">MOD 02</span>
-          <h3 class="module-name">Geheugen</h3>
-          <p class="module-copy">Standaard SO-DIMM geheugen in plaats van vastgesoldeerd RAM, zodat upgrades eenvoudig blijven.</p>
-        </article>
-        <article class="module-card">
-          <span class="module-id">MOD 03</span>
-          <h3 class="module-name">Opslag</h3>
-          <p class="module-copy">NVMe-opslag als los onderdeel, zodat defecten of capaciteitsnoden geen volledig nieuw toestel vragen.</p>
-        </article>
-        <article class="module-card">
-          <span class="module-id">MOD 04</span>
-          <h3 class="module-name">Poorten</h3>
-          <p class="module-copy">Verwisselbare poortmodules tonen hoe flexibiliteit en herstelbaarheid samen kunnen bestaan.</p>
-        </article>
-        <article class="module-card">
-          <span class="module-id">MOD 05</span>
-          <h3 class="module-name">Accu</h3>
-          <p class="module-copy">Een batterij die apart vervangbaar is verlengt de bruikbare levensduur van de hele laptop.</p>
-        </article>
-        <article class="module-card">
-          <span class="module-id">MOD 06</span>
-          <h3 class="module-name">Toetsenbord</h3>
-          <p class="module-copy">Ook invoeronderdelen blijven verwisselbaar, zodat slijtage niet meteen een einde maakt aan het toestel.</p>
-        </article>
-      </div>
-      <div class="panel">
-        <strong>Ontwerpprincipe</strong>
-        <p>Standaardisatie, schroefbare montage en duidelijke documentatie zorgen ervoor dat reparatie niet uitzonderlijk aanvoelt, maar ingebouwd zit in het product.</p>
-      </div>
+      <h1>Typ hier je tekst</h1>
+
+      <textarea placeholder="Schrijf hier..."></textarea>
     </main>
 
     <footer class="footer">
-      <span class="footer-left">IGNACE TACK,SERRY NATHAN,GYSELBRECHT STAN,DURNEZ DOLF</span>
-      <span class="footer-right">DUURZAAMHEID · ONDERNEMENSCHAP · ETHIEK</span>
+      DUURZAAMHEID · ONDERNEMENSCHAP · ETHIEK
     </footer>
+
   </div>
-
-  <script>
-    const solutionFrame = document.getElementById("solution-frame");
-    const solutionFrameCount = document.getElementById("solution-frame-count");
-    const FIRST_FRAME = 500;
-    const LAST_FRAME = 539;
-    const TOTAL_FRAMES = LAST_FRAME - FIRST_FRAME + 1;
-
-    let activeFrame = 0;
-    let frameDirection = 1;
-
-    const frames = Array.from({ length: TOTAL_FRAMES }, (_, index) => {
-      const image = new Image();
-      const number = String(FIRST_FRAME + index).padStart(4, "0");
-      image.src = `imgs/${number}.png`;
-      return image;
-    });
-
-    solutionFrame.src = frames[0].src;
-
-    window.setInterval(() => {
-      activeFrame += frameDirection;
-
-      if (activeFrame >= TOTAL_FRAMES - 1 || activeFrame <= 0) {
-        frameDirection *= -1;
-      }
-
-      solutionFrame.src = frames[activeFrame].src;
-      solutionFrameCount.textContent = String(activeFrame + 1).padStart(2, "0");
-    }, 80);
-  </script>
 </body>
 </html>
