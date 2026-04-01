@@ -28,7 +28,7 @@ body {
     min-height: 100vh;
     color: var(--ink);
     font-family: "DM Mono", monospace;
-    background: rgba(233, 227, 214, 0.92);
+    background: #e9e3d6;
 }
 
 a {
