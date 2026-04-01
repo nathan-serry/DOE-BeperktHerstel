@@ -1,733 +1,614 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stan — Gebouwd om Herbouwd te Worden</title>
+  <title>DOE - Repairability</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:     #E9E3D6;
-      --paper:  #F2EDE3;
-      --ink:    #16120C;
-      --accent: #B94A12;
-      --muted:  #7C7468;
-      --border: #C8C0B2;
-      --dark:   #16120C;
+      --bg: #e9e3d6;
+      --paper: #f4efe4;
+      --ink: #16120c;
+      --muted: #746c62;
+      --line: #cbc1b2;
+      --accent: #b85b28;
+      --panel: rgba(244, 239, 228, 0.8);
+      --nav-height: 82px;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: auto; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
-      background: var(--bg);
-      color: var(--ink);
-      font-family: 'DM Mono', monospace;
-      overflow-x: hidden;
-    }
-
-    /* Subtle grid texture */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(22,18,12,0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(22,18,12,0.045) 1px, transparent 1px);
-      background-size: 52px 52px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── LOADING ─────────────────────────────────────────── */
-    #loading {
-      position: fixed;
-      inset: 0;
-      background: var(--dark);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      z-index: 200;
-      transition: opacity 0.7s ease;
-    }
-    #loading.hidden { opacity: 0; pointer-events: none; }
-
-    #loading-wordmark {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 28px;
-      color: rgba(255,255,255,0.9);
-      letter-spacing: 0.04em;
-    }
-    #loading-wordmark span { color: var(--accent); }
-
-    #loading-status {
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-    }
-
-    #progress-bar-track {
-      width: 140px;
-      height: 1px;
-      background: rgba(255,255,255,0.12);
-    }
-    #progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: rgba(255,255,255,0.5);
-      transition: width 0.1s linear;
-    }
-
-    /* ── FIXED FRAME DISPLAY (behind content) ───────────── */
-    #frame-display {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--dark);
-      will-change: contents;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    #frame-img {
-      max-width: 78%;
-      max-height: 78%;
-      object-fit: contain;
-      display: block;
-    }
-
-    /* Corner labels on dark display */
-    .display-label {
-      position: absolute;
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.2);
-      font-family: 'DM Mono', monospace;
-    }
-    #label-tl { top: 28px; left: 36px; }
-    #label-tr { top: 28px; right: 36px; text-align: right; }
-    #label-br { bottom: 28px; right: 36px; }
-
-    /* Scroll hint */
-    #scroll-hint {
-      position: absolute;
-      bottom: 36px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      transition: opacity 0.4s;
-    }
-    #scroll-hint.hidden { opacity: 0; }
-    #scroll-hint-text {
-      font-size: 8px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.25);
-    }
-    #scroll-hint-bar {
-      width: 1px;
-      height: 36px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
-      animation: pulse 1.8s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.3; transform: scaleY(1); }
-      50%       { opacity: 0.8; transform: scaleY(1.1); }
-    }
-
-    /* ── CONTENT SECTIONS (stack over frame display) ────── */
-    .panel {
-      position: relative;
-      z-index: 1;
-      background: var(--bg);
-    }
-
-    /* ── HERO SECTION ───────────────────────────────────── */
-    #hero {
       min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22)),
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 51px,
+          rgba(22, 18, 12, 0.042) 51px,
+          rgba(22, 18, 12, 0.042) 52px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 51px,
+          rgba(22, 18, 12, 0.042) 51px,
+          rgba(22, 18, 12, 0.042) 52px
+        ),
+        var(--bg);
+      color: var(--ink);
+      font-family: "DM Mono", monospace;
     }
 
-    /* Nav */
-    #nav {
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page-shell {
+      width: min(1360px, calc(100% - 32px));
+      margin: 16px auto;
+      border: 1px solid var(--line);
+      background: rgba(233, 227, 214, 0.92);
+      overflow: clip;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 26px 52px;
-      border-bottom: 1px solid var(--border);
+      gap: 24px;
+      min-height: var(--nav-height);
+      padding: 18px 28px;
+      border-bottom: 1px solid rgba(203, 193, 178, 0.92);
+      background: rgba(244, 239, 228, 0.9);
+      backdrop-filter: blur(10px);
     }
-    #nav-brand {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 17px;
-      letter-spacing: 0.06em;
-      color: var(--ink);
-    }
-    #nav-brand em { color: var(--accent); font-style: normal; }
 
-    #nav-links {
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-family: "Syne", sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .menu {
       display: flex;
-      gap: 44px;
+      align-items: center;
+      gap: 14px;
       list-style: none;
     }
-    #nav-links a {
-      font-size: 9px;
+
+    .menu a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.74rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
+      transition: color 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
     }
-    #nav-links a:hover { color: var(--ink); }
 
-    #nav-cta {
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+    .menu a:hover,
+    .menu a.is-active {
       color: var(--ink);
-      text-decoration: none;
-      border-bottom: 1px solid var(--ink);
-      padding-bottom: 2px;
-      transition: color 0.2s, border-color 0.2s;
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.38);
     }
-    #nav-cta:hover { color: var(--accent); border-color: var(--accent); }
 
-    /* Hero body */
-    #hero-body {
+    .hero {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: end;
-      padding: 64px 52px 52px;
-      gap: 56px;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      padding: 64px 28px 38px;
     }
 
-    #hero-left { display: flex; flex-direction: column; gap: 28px; }
+    .hero-copy {
+      display: grid;
+      gap: 20px;
+      max-width: 920px;
+    }
 
-    #hero-eyebrow {
+    .eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
       color: var(--accent);
-      animation: fadeUp 0.6s ease both 0.1s;
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
     }
-    #hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 24px;
+
+    .eyebrow::before {
+      content: "";
+      width: 30px;
       height: 1px;
       background: var(--accent);
     }
 
-    #hero-headline {
-      font-family: 'Syne', sans-serif;
+    .hero-title {
+      max-width: 12ch;
+      font-family: "Syne", sans-serif;
+      font-size: clamp(2.7rem, 5vw, 4.4rem);
       font-weight: 800;
-      font-size: clamp(56px, 7.5vw, 104px);
-      line-height: 0.9;
-      letter-spacing: -0.025em;
-      color: var(--ink);
-      animation: fadeUp 0.7s ease both 0.2s;
-    }
-    #hero-headline .hollow {
-      -webkit-text-stroke: 2px var(--ink);
-      color: transparent;
+      line-height: 1;
+      letter-spacing: -0.05em;
     }
 
-    #hero-right { display: flex; flex-direction: column; gap: 36px; }
-
-    #hero-desc {
-      font-size: 13px;
-      line-height: 1.8;
+    .hero-subtitle {
+      max-width: 860px;
       color: var(--muted);
-      max-width: 360px;
-      animation: fadeUp 0.6s ease both 0.35s;
+      font-size: 0.97rem;
+      line-height: 1.95;
     }
 
-    #hero-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      border: 1px solid var(--border);
-      animation: fadeUp 0.6s ease both 0.45s;
-    }
-    .stat-cell {
-      padding: 18px 20px;
-      border-right: 1px solid var(--border);
-    }
-    .stat-cell:last-child { border-right: none; }
-    .stat-label {
-      font-size: 8px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    .stat-value {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--ink);
-    }
-
-    /* Hero footer bar */
-    #hero-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 52px;
-      border-top: 1px solid var(--border);
-    }
-    #hero-bar-left {
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-    }
-    #hero-bar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .chevron {
-      width: 10px;
-      height: 10px;
-      border-right: 1.5px solid var(--muted);
-      border-bottom: 1.5px solid var(--muted);
-      transform: rotate(45deg) translate(-2px, -2px);
-    }
-
-    /* ── AFTER / MODULES SECTION ────────────────────────── */
-    #modules-section {
-      padding: 80px 52px 64px;
-    }
-
-    #section-head {
-      display: flex;
-      align-items: baseline;
-      gap: 18px;
-      padding-top: 36px;
-      border-top: 1px solid var(--border);
-      margin-bottom: 56px;
-    }
-    #section-num {
-      font-size: 10px;
-      color: var(--accent);
-      letter-spacing: 0.1em;
-    }
-    #section-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: clamp(34px, 4vw, 56px);
-      letter-spacing: -0.02em;
-    }
-    #section-note {
-      margin-left: auto;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.07em;
-      text-align: right;
-      line-height: 1.6;
-      max-width: 220px;
-    }
-
-    #modules-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      border: 1px solid var(--border);
-      margin-bottom: 56px;
-    }
-    .module-card {
-      padding: 32px 28px 28px;
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      background: var(--bg);
-      transition: background 0.2s;
-      /* entrance animation */
-      opacity: 0;
-      transform: translateY(14px);
-      transition: opacity 0.4s ease, transform 0.4s ease, background 0.2s;
-    }
-    .module-card:hover { background: var(--paper); }
-    .module-card.visible { opacity: 1; transform: none; }
-    /* remove right border on last column */
-    .module-card:nth-child(3n) { border-right: none; }
-    /* remove bottom border on last row */
-    .module-card:nth-child(4),
-    .module-card:nth-child(5),
-    .module-card:nth-child(6) { border-bottom: none; }
-
-    .mod-num {
-      font-size: 8px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-    .mod-name {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 21px;
-      color: var(--ink);
-    }
-    .mod-spec {
-      font-size: 11px;
-      line-height: 1.65;
-      color: var(--muted);
-      flex: 1;
-    }
-    .mod-status {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 8px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .status-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #52B788;
-      flex-shrink: 0;
-    }
-    .status-dot.soon { background: #E9A23B; }
-
-    /* CTA row */
-    #cta-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 36px;
-      border-top: 1px solid var(--border);
-    }
-    #cta-copy {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: clamp(20px, 2.5vw, 34px);
-      letter-spacing: -0.015em;
-    }
-    #cta-btn {
+    .hero-indicator {
       display: inline-flex;
       align-items: center;
-      gap: 14px;
-      background: var(--ink);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.1em;
+      gap: 12px;
+      margin: 0 28px 34px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      padding: 18px 30px;
-      text-decoration: none;
-      border: 1px solid var(--ink);
-      transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
-    #cta-btn:hover {
-      background: var(--accent);
+
+    .hero-indicator::after {
+      content: "";
+      width: 38px;
+      height: 1px;
+      background: linear-gradient(to right, var(--accent), transparent);
+      animation: drift 1.7s ease-in-out infinite;
+    }
+
+    .overview-shell {
+      padding: 0 28px 34px;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .overview-box {
+      display: grid;
+      gap: 10px;
+      padding: 22px 20px 20px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      cursor: pointer;
+      transform-origin: center;
+      transition: transform 0.24s ease, border-color 0.24s ease, background-color 0.24s ease, box-shadow 0.24s ease;
+    }
+
+    .overview-box:hover,
+    .overview-box.is-active {
+      transform: translateY(-4px) scale(1.02);
       border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.56);
+      box-shadow: 0 14px 30px rgba(22, 18, 12, 0.08);
     }
-    #cta-arrow {
-      width: 12px;
-      height: 12px;
+
+    .overview-step {
+      color: var(--accent);
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .overview-title {
+      font-family: "Syne", sans-serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+    }
+
+    .overview-copy {
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.7;
+    }
+
+    .story-timeline-section {
+      padding: 42px 28px 72px;
+      border-top: 1px solid var(--line);
+    }
+
+    .story-timeline-inner {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .story-timeline-heading {
+      margin-bottom: 34px;
+      text-align: center;
+    }
+
+    .story-timeline-heading h2 {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(2rem, 3vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+    }
+
+    .story-timeline-heading p {
+      max-width: 560px;
+      margin: 14px auto 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.8;
+    }
+
+    .story-timeline {
+      position: relative;
+      display: grid;
+      gap: 36px;
+      padding-left: 86px;
+    }
+
+    .story-timeline::before {
+      content: "";
+      position: absolute;
+      left: 23px;
+      top: 8px;
+      bottom: 8px;
+      width: 1px;
+      background: var(--line);
+    }
+
+    .story-point {
+      position: relative;
+      display: block;
+      padding: 6px 0 6px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      scroll-margin-top: calc(var(--nav-height) + 24px);
+      transition: opacity 0.24s ease, transform 0.24s ease;
+    }
+
+    .story-point:hover {
+      opacity: 0.92;
+      transform: translateX(6px);
+    }
+
+    .story-point-marker {
+      position: absolute;
+      left: -86px;
+      top: 0;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      font-family: "Syne", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      background: var(--paper);
+    }
+
+    .story-point[data-tone="problem"] .story-point-marker {
+      background: #f0dfd8;
+    }
+
+    .story-point[data-tone="solution"] .story-point-marker {
+      background: #dde7da;
+    }
+
+    .story-point[data-tone="impact"] .story-point-marker {
+      background: #efe5cf;
+    }
+
+    .story-point-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .story-point-title {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+      font-weight: 700;
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+    }
+
+    .story-point-copy {
+      max-width: 620px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.9;
+    }
+
+    .story-point-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      color: var(--accent);
+      font-size: 0.74rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .story-point-link::after {
+      content: "";
+      width: 10px;
+      height: 10px;
       border-right: 1.5px solid currentColor;
       border-top: 1.5px solid currentColor;
       transform: rotate(45deg);
     }
 
-    /* ── FOOTER ──────────────────────────────────────────── */
-    #footer {
+    .footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 24px 52px;
-      border-top: 1px solid var(--border);
-      margin-top: 24px;
-    }
-    #footer-brand {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 14px;
-      letter-spacing: 0.05em;
-    }
-    #footer-brand em { color: var(--accent); font-style: normal; }
-    #footer-meta {
-      font-size: 9px;
+      gap: 16px;
+      padding: 20px 28px 24px;
       color: var(--muted);
-      letter-spacing: 0.08em;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-top: 1px solid var(--line);
     }
 
-    /* ── ENTRANCE ANIMATIONS ─────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
     }
 
-    /* ── RESPONSIVE ─────────────────────────────────────── */
-    @media (max-width: 860px) {
-      #hero-body  { grid-template-columns: 1fr; }
-      #nav-links  { display: none; }
-      #modules-grid { grid-template-columns: 1fr 1fr; }
-      .module-card:nth-child(3n) { border-right: 1px solid var(--border); }
-      .module-card:nth-child(2n) { border-right: none; }
-      .module-card:nth-child(4),
-      .module-card:nth-child(5),
-      .module-card:nth-child(6) { border-bottom: 1px solid var(--border); }
-      .module-card:nth-child(5),
-      .module-card:nth-child(6) { border-bottom: none; }
-      #section-note { display: none; }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
     }
-    @media (max-width: 560px) {
-      #nav { padding: 20px 24px; }
-      #hero-body, #hero-bar, #modules-section, #footer { padding-left: 24px; padding-right: 24px; }
-      #modules-grid { grid-template-columns: 1fr; }
-      .module-card { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
-      .module-card:last-child { border-bottom: none !important; }
-      #cta-row { flex-direction: column; align-items: flex-start; gap: 28px; }
+
+    @keyframes drift {
+      0%, 100% { transform: scaleX(0.8); opacity: 0.55; }
+      50% { transform: scaleX(1); opacity: 1; }
+    }
+
+    @media (max-width: 980px) {
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --nav-height: 72px;
+      }
+
+      .page-shell {
+        width: min(100% - 12px, 100%);
+        margin: 6px auto;
+      }
+
+      .topbar,
+      .hero,
+      .overview-shell,
+      .story-timeline-section,
+      .footer {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .menu {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 46px;
+      }
+
+      .hero-title {
+        font-size: clamp(2.4rem, 13vw, 3.6rem);
+      }
+
+      .hero-indicator {
+        margin-left: 18px;
+        margin-right: 18px;
+      }
+
+      .story-timeline {
+        padding-left: 62px;
+      }
+
+      .story-timeline::before {
+        left: 17px;
+      }
+
+      .story-point-marker {
+        left: -62px;
+        width: 36px;
+        height: 36px;
+        font-size: 0.88rem;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="#top">Repairability</a>
+      <nav>
+        <ul class="menu">
+          <li><a href="#timeline-probleem">Het probleem</a></li>
+          <li><a href="#timeline-oplossing">De oplossing</a></li>
+          <li><a href="#timeline-impact">Impact</a></li>
+        </ul>
+      </nav>
+    </header>
 
-  <!-- Loading overlay -->
-  <div id="loading">
-    <div id="loading-wordmark">DOE<em>.</em></div>
-    <div id="loading-status">Laden</div>
-    <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
-  </div>
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy reveal">
+          <div class="eyebrow">Modulaire laptop · Gen 3</div>
+          <h1 class="hero-title">Wat is de impact van een laptop componentsgewijs te ontwerpen?</h1>
+          <p class="hero-subtitle">
+            Waarom modulair werken eerder waarom niet. Wanneer je laptop stuk is is zelden het hele apparaat stuk. Dus wat als je in de plaats van een nieuw toestel te kopen simpelweg het onderdeel ("module") kon vervangen. Dit is namelijk beter voor het milieu, er is namelijk minder nood aan schaarse materialen en het is ook nog eens beter voor de portemonnee. Dus waarom doen we dit dan niet al lang? Waarom spelen de bedrijven die hier voor instaan op de achtergrond? Wel die vragen willen we hier beantwoorden.
+          </p>
+        </div>
+      </section>
 
-  <!-- ── HERO ──────────────────────────────────────────── -->
-  <section id="hero" class="panel">
-    <nav id="nav">
-      <div id="nav-brand">DOE<em>.</em></div>
-      <ul id="nav-links">
-        <li><a href="#">Modules</a></li>
-        <li><a href="#">Specificaties</a></li>
-        <li><a href="#">Reparatie</a></li>
-        <li><a href="#">Open Source</a></li>
-      </ul>
-      <a href="#" id="nav-cta">Stel de jouwe samen</a>
-    </nav>
+      <div class="hero-indicator">Scroll naar de tijdlijn</div>
 
-    <div id="hero-body">
-      <div id="hero-left">
-        <div id="hero-eyebrow">Modulaire Laptop · Gen 3</div>
-        <h1 id="hero-headline">
-          GEBOUWD<br>
-          OM TE<br>
-          <span class="hollow">HERBOUWEN.</span>
-        </h1>
-      </div>
-      <div id="hero-right">
-        <p id="hero-desc">
-          Een laptop ontworpen vanuit de grond op repareerbaarheid.
-          Elk module wordt geleverd met documentatie, een schroevendraaier,
-          en de zekerheid dat het over vijf jaar nog te vervangen is.
-        </p>
-        <div id="hero-stats">
-          <div class="stat-cell">
-            <div class="stat-label">Modules</div>
-            <div class="stat-value">6</div>
+      <section class="overview-shell">
+        <div class="overview-grid">
+          <a class="overview-box reveal" data-target="timeline-probleem" href="#timeline-probleem">
+            <span class="overview-step">Stap 1</span>
+            <h2 class="overview-title">Het probleem</h2>
+            <p class="overview-copy">Klik en spring naar het eerste deel van de tijdlijn.</p>
+          </a>
+          <a class="overview-box reveal" data-target="timeline-oplossing" href="#timeline-oplossing">
+            <span class="overview-step">Stap 2</span>
+            <h2 class="overview-title">De oplossing</h2>
+            <p class="overview-copy">Klik en bekijk hoe modulair ontwerp een alternatief wordt.</p>
+          </a>
+          <a class="overview-box reveal" data-target="timeline-impact" href="#timeline-impact">
+            <span class="overview-step">Stap 3</span>
+            <h2 class="overview-title">Impact en toekomst</h2>
+            <p class="overview-copy">Klik en ga naar de maatschappelijke en ecologische impact.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="story-timeline-section">
+        <div class="story-timeline-inner">
+          <div class="story-timeline-heading reveal">
+            <h2>Van vraag naar verdieping</h2>
+            <p>Gebruik eerst de boxen om naar de juiste stap te scrollen. Klik daarna op een tijdlijn-item om de volledige aparte pagina te openen.</p>
           </div>
-          <div class="stat-cell">
-            <div class="stat-label">iFixit Score</div>
-            <div class="stat-value">10 / 10</div>
-          </div>
-          <div class="stat-cell">
-            <div class="stat-label">Gewicht</div>
-            <div class="stat-value">1,3 kg</div>
+
+          <div class="story-timeline">
+            <a class="story-point reveal" id="timeline-probleem" data-target="timeline-probleem" data-tone="problem" href="probleem.html">
+              <span class="story-point-marker">1</span>
+              <span class="story-point-label">Pagina 1</span>
+              <h3 class="story-point-title">Het probleem</h3>
+              <p class="story-point-copy">Vastgesoldeerde onderdelen en moeilijke reparaties maken van kleine defecten al snel een reden om een volledig nieuw toestel te kopen.</p>
+              <span class="story-point-link">Lees meer</span>
+            </a>
+
+            <a class="story-point reveal" id="timeline-oplossing" data-target="timeline-oplossing" data-tone="solution" href="oplossing.html">
+              <span class="story-point-marker">2</span>
+              <span class="story-point-label">Pagina 2</span>
+              <h3 class="story-point-title">De oplossing</h3>
+              <p class="story-point-copy">Een modulaire laptop behandelt onderdelen als vervangbare modules, waardoor onderhoud, upgrades en herstel opnieuw logisch worden.</p>
+              <span class="story-point-link">Lees meer</span>
+            </a>
+
+            <a class="story-point reveal" id="timeline-impact" data-target="timeline-impact" data-tone="impact" href="impact.html">
+              <span class="story-point-marker">3</span>
+              <span class="story-point-label">Pagina 3</span>
+              <h3 class="story-point-title">Impact en toekomst</h3>
+              <p class="story-point-copy">Een herstelbaar toestel kan langer meegaan, minder schaarse materialen vragen en op termijn financieel interessanter worden.</p>
+              <span class="story-point-link">Lees meer</span>
+            </a>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
 
-    <div id="hero-bar">
-      <div id="hero-bar-left">Model Nr. DOE–03 &nbsp;·&nbsp; Revisie 3.2 &nbsp;·&nbsp; Open Hardware</div>
-      <div id="hero-bar-right">
-        Scroll om te verkennen<div class="chevron"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Scroll sentinel: provides height for animation scrubbing -->
-  <div id="scroll-sentinel"></div>
-
-  <!-- ── MODULES SECTION ───────────────────────────────── -->
-  <section id="modules-section" class="panel">
-    <div id="section-head">
-      <span id="section-num">02 /</span>
-      <h2 id="section-title">De Modules</h2>
-      <p id="section-note">
-        Elk onderdeel is een volwaardig component — ontworpen om door jou
-        begrepen, onderhouden en vervangen te worden.
-      </p>
-    </div>
-
-    <div id="modules-grid">
-      <div class="module-card">
-        <div class="mod-num">MOD – 01</div>
-        <div class="mod-name">Processor</div>
-        <div class="mod-spec">Gesockelde LGA · AMD Ryzen AI of Intel Core Ultra · Vervangbaar in minder dan 4 minuten met bijgeleverde T5-schroevendraaier</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 02</div>
-        <div class="mod-name">Geheugen</div>
-        <div class="mod-spec">Standaard SO-DIMM slots · 16 – 64 GB · Dual channel · Geen lijm, geen solderen</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 03</div>
-        <div class="mod-name">Opslag</div>
-        <div class="mod-spec">Dubbele M.2 NVMe · PCIe Gen 4 · Optionele hot-swap beugel voor aangepaste configuraties</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 04</div>
-        <div class="mod-name">poorten</div>
-        <div class="mod-spec">Innovatief kliksysteem, geen breekijzer nodig · Keuze uit 15 verschillende verwisselbare poorten</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 05</div>
-        <div class="mod-name">Accu</div>
-        <div class="mod-spec">61 Wh · Gereedschapsvrij klikmechanisme · 1 000 volledige laadcycli · Apart leverbaar voor minimale uitvaltijd</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 06</div>
-        <div class="mod-name">Toetsenbord</div>
-        <div class="mod-spec">28 regionale indelingen · Click-swap mechanisme · Verlicht · Vloeistofgeleid chassis · Hot-swappable</div>
-        <div class="mod-status"><span class="status-dot soon"></span>Q3 2025</div>
-      </div>
-    </div>
-
-    <div id="cta-row">
-      <div id="cta-copy">Stel jouw DOE samen.</div>
-      <a href="#" id="cta-btn">
-        Begin met bouwen
-        <div id="cta-arrow"></div>
-      </a>
-    </div>
-  </section>
-
-  <footer id="footer" class="panel">
-    <div id="footer-brand">DOE<em>.</em></div>
-    <div id="footer-meta">© 2025 DOE Technology &nbsp;·&nbsp; Open Hardware Initiatief &nbsp;·&nbsp; Alle schema's gepubliceerd onder CERN OHL</div>
-  </footer>
-
-  <!-- Fixed animation display (behind .panel elements) -->
-  <div id="frame-display">
-    <img id="frame-img" alt="DOE Laptop" />
-    <div class="display-label" id="label-tl">DOE–03 · 3D Weergave</div>
-    <div class="display-label" id="label-tr">Frame <span id="frame-num">00</span> / 39</div>
-    <div class="display-label" id="label-br">Scroll om te draaien</div>
-    <div id="scroll-hint">
-      <div id="scroll-hint-text">scroll</div>
-      <div id="scroll-hint-bar"></div>
-    </div>
+    <footer class="footer">
+      <span>DOE Technology</span>
+      <span>Duurzaamheid · Repareerbaarheid · Open hardware</span>
+    </footer>
   </div>
 
   <script>
-    const FIRST            = 500;
-    const LAST             = 539;
-    const TOTAL            = LAST - FIRST + 1;   // 40
-    const PIXELS_PER_FRAME = 20;
+    const navLinks = Array.from(document.querySelectorAll(".menu a"));
+    const overviewBoxes = Array.from(document.querySelectorAll(".overview-box"));
+    const storyPoints = Array.from(document.querySelectorAll(".story-point"));
+    const revealItems = Array.from(document.querySelectorAll(".reveal"));
 
-    // ── Sentinel height ──────────────────────────────────
-    const sentinel = document.getElementById('scroll-sentinel');
-    sentinel.style.height = (window.innerHeight + (TOTAL - 1) * PIXELS_PER_FRAME) + 'px';
+    function setActiveTarget(id) {
+      navLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.getAttribute("href") === `#${id}`);
+      });
 
-    // ── Preload ──────────────────────────────────────────
-    const frames       = new Array(TOTAL);
-    let   loadedCount  = 0;
-    const progressFill = document.getElementById('progress-bar-fill');
-    const loadingEl    = document.getElementById('loading');
-    const frameImg     = document.getElementById('frame-img');
-    const frameNumEl   = document.getElementById('frame-num');
-    const scrollHint   = document.getElementById('scroll-hint');
-
-    function onAllLoaded() {
-      updateFrame(0);
-      loadingEl.classList.add('hidden');
-      setTimeout(() => loadingEl.remove(), 800);
-    }
-
-    for (let i = 0; i < TOTAL; i++) {
-      const img = new Image();
-      img.src   = `./${String(FIRST + i).padStart(4, '0')}.png`;
-      frames[i] = img;
-      img.onload = img.onerror = () => {
-        loadedCount++;
-        progressFill.style.width = (loadedCount / TOTAL * 100) + '%';
-        if (loadedCount === TOTAL) onAllLoaded();
-      };
-    }
-
-    // ── Scroll → frame ───────────────────────────────────
-    let rafPending = false;
-    let currentIdx = -1;
-
-    function updateFrame(index) {
-      if (index === currentIdx) return;
-      currentIdx = index;
-      frameImg.src = frames[index].src;
-      frameNumEl.textContent = String(index).padStart(2, '0');
-    }
-
-    function onScroll() {
-      if (rafPending) return;
-      rafPending = true;
-      requestAnimationFrame(() => {
-        rafPending = false;
-        const into     = window.scrollY - sentinel.offsetTop;
-        const max      = (TOTAL - 1) * PIXELS_PER_FRAME;
-        const progress = Math.min(Math.max(into / max, 0), 1);
-        updateFrame(Math.min(Math.floor(progress * TOTAL), TOTAL - 1));
-        if (into > 20) scrollHint.classList.add('hidden');
-        else           scrollHint.classList.remove('hidden');
+      overviewBoxes.forEach((box) => {
+        box.classList.toggle("is-active", box.dataset.target === id);
       });
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', () => {
-      sentinel.style.height = (window.innerHeight + (TOTAL - 1) * PIXELS_PER_FRAME) + 'px';
-      onScroll();
+    overviewBoxes.forEach((box) => {
+      box.addEventListener("click", () => {
+        setActiveTarget(box.dataset.target);
+      });
     });
 
-    // ── Module entrance animations ────────────────────────
-    const cards    = document.querySelectorAll('.module-card');
-    const cardList = Array.from(cards);
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const i = cardList.indexOf(entry.target);
-          setTimeout(() => entry.target.classList.add('visible'), i * 55);
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.08 });
-    cards.forEach(c => io.observe(c));
-  </script>
+    const timelineObserver = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
+        if (visible) {
+          setActiveTarget(visible.target.id);
+        }
+      },
+      {
+        rootMargin: "-35% 0px -45% 0px",
+        threshold: [0.25, 0.45, 0.7]
+      }
+    );
+
+    storyPoints.forEach((point) => timelineObserver.observe(point));
+
+    const revealObserver = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.14
+      }
+    );
+
+    revealItems.forEach((item) => revealObserver.observe(item));
+    setActiveTarget("timeline-probleem");
+  </script>
 </body>
 </html>
