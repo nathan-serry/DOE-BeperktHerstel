@@ -557,7 +557,7 @@ a {
     margin-top: 30px;
     margin-bottom: 30px;
     padding: 40px 28px;
-    background: rgba(244, 239, 228, 0.84);
+    background: rgba(255, 255, 255, 0.24);
     border: 1px solid var(--line);
 }
 
@@ -640,7 +640,7 @@ a {
 .cost-panel {
     padding: 30px;
     border: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.24);
 }
 
 .cost-panel h3 {
