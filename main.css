@@ -476,6 +476,7 @@ a {
     font-size: 0.72rem;
     letter-spacing: 0.12em;
     border-top: 1px solid var(--line);
+    background-color: var(--bg);
 }
 
 /* Scroll hint */
