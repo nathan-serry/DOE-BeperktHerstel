@@ -4,137 +4,49 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Oplossing - DOE</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --bg: #e9e3d6;
-      --paper: #f4efe4;
-      --ink: #16120c;
-      --muted: #746c62;
-      --line: #cbc1b2;
-      --accent: #b85b28;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--bg);
-      font-family: "DM Mono", monospace;
-      padding: 16px;
-      color: var(--ink);
-    }
-
-    .shell {
-      max-width: 1200px;
-      margin: auto;
-      border: 1px solid var(--line);
-      background: var(--paper);
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      padding: 24px 28px;
-      border-bottom: 1px solid var(--line);
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-    }
-
-    .brand {
-      font-family: "Syne", sans-serif;
-      font-weight: 800;
-      font-size: 1.3rem;
-    }
-
-    .content {
-      padding: 60px 28px;
-      max-width: 900px;
-    }
-
-    .kicker {
-      color: var(--accent);
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      font-family: "Syne", sans-serif;
-      font-size: clamp(3rem, 6vw, 5rem);
-      line-height: 1;
-      letter-spacing: -0.04em;
-      margin-bottom: 40px;
-      text-transform: uppercase;
-    }
-
-    p {
-      color: var(--muted);
-      line-height: 1.9;
-      margin-bottom: 20px;
-      max-width: 750px;
-    }
-
-    ul {
-      margin-top: 20px;
-      margin-bottom: 40px;
-      padding-left: 20px;
-      color: var(--muted);
-    }
-
-    li {
-      margin-bottom: 10px;
-    }
-
-    h2 {
-      margin-top: 40px;
-      margin-bottom: 10px;
-      font-size: 0.8rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="main.css" rel="stylesheet">
 </head>
-
 <body>
-  <div class="shell">
-
+  <div class="page-shell">
     <header class="topbar">
-      <span class="brand">DOE</span>
-      <a href="index.html">Terug naar tijdlijn</a>
+      <a class="brand" href="index.html">DOE</a>
+      <nav>
+        <ul class="menu">
+          <li><a  href="probleem.html">Het probleem</a></li>
+          <li><a class="is-active" href="oplossing.html">De oplossing</a></li>
+          <li><a  href="impact.html">Economische Haalbaarheid</a></li>
+        </ul>
+      </nav>
     </header>
 
-    <main class="content">
-      <div class="kicker">Pagina 2</div>
+    <main class="hero probleem">
       <h1>De oplossing</h1>
-
       <p>
-        Een mogelijke oplossing voor dit probleem is modulair werken. Hierbij wordt elk belangrijk onderdeel van een laptop ontworpen als een apart, vervangbaar component. 
+        Een mogelijke oplossing voor dit probleem is modulair werken. Hierbij wordt elk belangrijk onderdeel van een laptop ontworpen als een aparte, vervangbare module.
         In plaats van het volledige toestel te vervangen bij een defect, kan enkel het beschadigde of verouderde onderdeel worden vervangen.
       </p>
 
       <p>
-        Dit zorgt voor minder elektronisch afval en verlaagt de kost op lange termijn voor de gebruiker. Toch zijn er, naast deze voordelen, ook enkele nadelen verbonden aan dit systeem.
+        Dit zorgt voor minder elektronisch afval en verlaagt de kost op lange termijn voor de gebruiker. Toch zijn er naast deze voordelen, ook enkele nadelen verbonden aan dit systeem.
       </p>
+
+        <h2>Voordelen</h2>
+        <ul>
+            <li>Defecte onderdelen kunnen eenvoudig vervangen worden.</li>
+            <li>De levensduur van het toestel wordt aanzienlijk verlengd.</li>
+            <li>Minder elektronisch afval, wat beter is voor het milieu.</li>
+            <li>Meer ruimte voor koeling kan zorgen voor betere prestaties.</li>
+        </ul>
 
       <h2>Nadelen</h2>
       <ul>
         <li>Modulaire laptops zijn vaak minder compact en ogen robuuster.</li>
         <li>Onderdelen zijn slechts bij een beperkt aantal leveranciers verkrijgbaar.</li>
-        <li>De prijs ligt vaak hoger dan bij traditionele laptops.</li>
+        <li>De prijs ligt vaak hoger, dan bij traditionele laptops.</li>
         <li>Compatibiliteit tussen oude en nieuwe componenten kan een probleem vormen.</li>
-      </ul>
-
-      <h2>Voordelen</h2>
-      <ul>
-        <li>Defecte onderdelen kunnen eenvoudig vervangen worden.</li>
-        <li>De levensduur van het toestel wordt aanzienlijk verlengd.</li>
-        <li>Minder elektronisch afval, wat beter is voor het milieu.</li>
-        <li>Meer ruimte voor koeling kan zorgen voor betere prestaties.</li>
       </ul>
 
       <p>
@@ -144,6 +56,11 @@
       
 
     </main>
+
+    <footer class="footer">
+      <span class="footer-left">Serry Nathan,Tack Ignace,Durnez Dolf,Gyselbrecht Stan</span>
+      <span class="footer-right">DUURZAAMHEID · ONDERNEMERSCHAP · ETHIEK</span>
+    </footer>
 
   </div>
 </body>

@@ -1,733 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DOE — Wat is de impact van een laptop componetsgewijs op te bouwen</title>
+  <title>DOE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:     #E9E3D6;
-      --paper:  #F2EDE3;
-      --ink:    #16120C;
-      --accent: #B94A12;
-      --muted:  #7C7468;
-      --border: #C8C0B2;
-      --dark:   #16120C;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: auto; }
-
-    body {
-      background: var(--bg);
-      color: var(--ink);
-      font-family: 'DM Mono', monospace;
-      overflow-x: hidden;
-    }
-
-    /* Subtle grid texture */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(22,18,12,0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(22,18,12,0.045) 1px, transparent 1px);
-      background-size: 52px 52px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── LOADING ─────────────────────────────────────────── */
-    #loading {
-      position: fixed;
-      inset: 0;
-      background: var(--dark);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      z-index: 200;
-      transition: opacity 0.7s ease;
-    }
-    #loading.hidden { opacity: 0; pointer-events: none; }
-
-    #loading-wordmark {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 28px;
-      color: rgba(255,255,255,0.9);
-      letter-spacing: 0.04em;
-    }
-    #loading-wordmark span { color: var(--accent); }
-
-    #loading-status {
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-    }
-
-    #progress-bar-track {
-      width: 140px;
-      height: 1px;
-      background: rgba(255,255,255,0.12);
-    }
-    #progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: rgba(255,255,255,0.5);
-      transition: width 0.1s linear;
-    }
-
-    /* ── FIXED FRAME DISPLAY (behind content) ───────────── */
-    #frame-display {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--dark);
-      will-change: contents;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    #frame-img {
-      max-width: 78%;
-      max-height: 78%;
-      object-fit: contain;
-      display: block;
-    }
-
-    /* Corner labels on dark display */
-    .display-label {
-      position: absolute;
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.2);
-      font-family: 'DM Mono', monospace;
-    }
-    #label-tl { top: 28px; left: 36px; }
-    #label-tr { top: 28px; right: 36px; text-align: right; }
-    #label-br { bottom: 28px; right: 36px; }
-
-    /* Scroll hint */
-    #scroll-hint {
-      position: absolute;
-      bottom: 36px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      transition: opacity 0.4s;
-    }
-    #scroll-hint.hidden { opacity: 0; }
-    #scroll-hint-text {
-      font-size: 8px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.25);
-    }
-    #scroll-hint-bar {
-      width: 1px;
-      height: 36px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
-      animation: pulse 1.8s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.3; transform: scaleY(1); }
-      50%       { opacity: 0.8; transform: scaleY(1.1); }
-    }
-
-    /* ── CONTENT SECTIONS (stack over frame display) ────── */
-    .panel {
-      position: relative;
-      z-index: 1;
-      background: var(--bg);
-    }
-
-    /* ── HERO SECTION ───────────────────────────────────── */
-    #hero {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-    }
-
-    /* Nav */
-    #nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 26px 52px;
-      border-bottom: 1px solid var(--border);
-    }
-    #nav-brand {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 17px;
-      letter-spacing: 0.06em;
-      color: var(--ink);
-    }
-    #nav-brand em { color: var(--accent); font-style: normal; }
-
-    #nav-links {
-      display: flex;
-      gap: 44px;
-      list-style: none;
-    }
-    #nav-links a {
-      font-size: 9px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    #nav-links a:hover { color: var(--ink); }
-
-    #nav-cta {
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--ink);
-      text-decoration: none;
-      border-bottom: 1px solid var(--ink);
-      padding-bottom: 2px;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    #nav-cta:hover { color: var(--accent); border-color: var(--accent); }
-
-    /* Hero body */
-    #hero-body {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: end;
-      padding: 64px 52px 52px;
-      gap: 56px;
-    }
-
-    #hero-left { display: flex; flex-direction: column; gap: 28px; }
-
-    #hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      animation: fadeUp 0.6s ease both 0.1s;
-    }
-    #hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 24px;
-      height: 1px;
-      background: var(--accent);
-    }
-
-    #hero-headline {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: clamp(56px, 7.5vw, 104px);
-      line-height: 0.9;
-      letter-spacing: -0.025em;
-      color: var(--ink);
-      animation: fadeUp 0.7s ease both 0.2s;
-    }
-    #hero-headline .hollow {
-      -webkit-text-stroke: 2px var(--ink);
-      color: transparent;
-    }
-
-    #hero-right { display: flex; flex-direction: column; gap: 36px; }
-
-    #hero-desc {
-      font-size: 13px;
-      line-height: 1.8;
-      color: var(--muted);
-      max-width: 360px;
-      animation: fadeUp 0.6s ease both 0.35s;
-    }
-
-    #hero-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      border: 1px solid var(--border);
-      animation: fadeUp 0.6s ease both 0.45s;
-    }
-    .stat-cell {
-      padding: 18px 20px;
-      border-right: 1px solid var(--border);
-    }
-    .stat-cell:last-child { border-right: none; }
-    .stat-label {
-      font-size: 8px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    .stat-value {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--ink);
-    }
-
-    /* Hero footer bar */
-    #hero-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 52px;
-      border-top: 1px solid var(--border);
-    }
-    #hero-bar-left {
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-    }
-    #hero-bar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .chevron {
-      width: 10px;
-      height: 10px;
-      border-right: 1.5px solid var(--muted);
-      border-bottom: 1.5px solid var(--muted);
-      transform: rotate(45deg) translate(-2px, -2px);
-    }
-
-    /* ── AFTER / MODULES SECTION ────────────────────────── */
-    #modules-section {
-      padding: 80px 52px 64px;
-    }
-
-    #section-head {
-      display: flex;
-      align-items: baseline;
-      gap: 18px;
-      padding-top: 36px;
-      border-top: 1px solid var(--border);
-      margin-bottom: 56px;
-    }
-    #section-num {
-      font-size: 10px;
-      color: var(--accent);
-      letter-spacing: 0.1em;
-    }
-    #section-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: clamp(34px, 4vw, 56px);
-      letter-spacing: -0.02em;
-    }
-    #section-note {
-      margin-left: auto;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.07em;
-      text-align: right;
-      line-height: 1.6;
-      max-width: 220px;
-    }
-
-    #modules-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      border: 1px solid var(--border);
-      margin-bottom: 56px;
-    }
-    .module-card {
-      padding: 32px 28px 28px;
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      background: var(--bg);
-      transition: background 0.2s;
-      /* entrance animation */
-      opacity: 0;
-      transform: translateY(14px);
-      transition: opacity 0.4s ease, transform 0.4s ease, background 0.2s;
-    }
-    .module-card:hover { background: var(--paper); }
-    .module-card.visible { opacity: 1; transform: none; }
-    /* remove right border on last column */
-    .module-card:nth-child(3n) { border-right: none; }
-    /* remove bottom border on last row */
-    .module-card:nth-child(4),
-    .module-card:nth-child(5),
-    .module-card:nth-child(6) { border-bottom: none; }
-
-    .mod-num {
-      font-size: 8px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-    .mod-name {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 21px;
-      color: var(--ink);
-    }
-    .mod-spec {
-      font-size: 11px;
-      line-height: 1.65;
-      color: var(--muted);
-      flex: 1;
-    }
-    .mod-status {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 8px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .status-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #52B788;
-      flex-shrink: 0;
-    }
-    .status-dot.soon { background: #E9A23B; }
-
-    /* CTA row */
-    #cta-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 36px;
-      border-top: 1px solid var(--border);
-    }
-    #cta-copy {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: clamp(20px, 2.5vw, 34px);
-      letter-spacing: -0.015em;
-    }
-    #cta-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--ink);
-      color: var(--bg);
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 18px 30px;
-      text-decoration: none;
-      border: 1px solid var(--ink);
-      transition: background 0.2s, color 0.2s, border-color 0.2s;
-    }
-    #cta-btn:hover {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
-    #cta-arrow {
-      width: 12px;
-      height: 12px;
-      border-right: 1.5px solid currentColor;
-      border-top: 1.5px solid currentColor;
-      transform: rotate(45deg);
-    }
-
-    /* ── FOOTER ──────────────────────────────────────────── */
-    #footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 24px 52px;
-      border-top: 1px solid var(--border);
-      margin-top: 24px;
-    }
-    #footer-brand {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 14px;
-      letter-spacing: 0.05em;
-    }
-    #footer-brand em { color: var(--accent); font-style: normal; }
-    #footer-meta {
-      font-size: 9px;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-    }
-
-    /* ── ENTRANCE ANIMATIONS ─────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── RESPONSIVE ─────────────────────────────────────── */
-    @media (max-width: 860px) {
-      #hero-body  { grid-template-columns: 1fr; }
-      #nav-links  { display: none; }
-      #modules-grid { grid-template-columns: 1fr 1fr; }
-      .module-card:nth-child(3n) { border-right: 1px solid var(--border); }
-      .module-card:nth-child(2n) { border-right: none; }
-      .module-card:nth-child(4),
-      .module-card:nth-child(5),
-      .module-card:nth-child(6) { border-bottom: 1px solid var(--border); }
-      .module-card:nth-child(5),
-      .module-card:nth-child(6) { border-bottom: none; }
-      #section-note { display: none; }
-    }
-    @media (max-width: 560px) {
-      #nav { padding: 20px 24px; }
-      #hero-body, #hero-bar, #modules-section, #footer { padding-left: 24px; padding-right: 24px; }
-      #modules-grid { grid-template-columns: 1fr; }
-      .module-card { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
-      .module-card:last-child { border-bottom: none !important; }
-      #cta-row { flex-direction: column; align-items: flex-start; gap: 28px; }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="main.css" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Loading overlay -->
   <div id="loading">
-    <div id="loading-wordmark">DOE<em>.</em></div>
-    <div id="loading-status">Laden</div>
+    <div id="loading-status"></div>
     <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
   </div>
 
-  <!-- ── HERO ──────────────────────────────────────────── -->
-  <section id="hero" class="panel">
-    <nav id="nav">
-      <div id="nav-brand">DOE<em>.</em></div>
-      <ul id="nav-links">
-        <li><a href="#">Modules</a></li>
-        <li><a href="#">Specificaties</a></li>
-        <li><a href="#">Reparatie</a></li>
-        <li><a href="#">Open Source</a></li>
-      </ul>
-      <a href="#" id="nav-cta">Stel de jouwe samen</a>
-    </nav>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">DOE</a>
+      <nav>
+        <ul class="menu">
+          <li><a href="probleem.html">Het probleem</a></li>
+          <li><a href="oplossing.html">De oplossing</a></li>
+          <li><a href="impact.html">Economische Haalbaarheid</a></li>
+        </ul>
+      </nav>
+    </header>
 
-    <div id="hero-body">
-      <div id="hero-left">
-        <div id="hero-eyebrow">Modulaire Laptop · Gen 3</div>
-        <h1 id="hero-headline">
-          GEBOUWD<br>
-          OM TE<br>
-          <span class="hollow">HERBOUWEN.</span>
-        </h1>
-      </div>
-      <div id="hero-right">
-        <p id="hero-desc">
-          Een laptop ontworpen vanuit de grond op repareerbaarheid.
-          Elk module wordt geleverd met documentatie, een schroevendraaier,
-          en de zekerheid dat het over vijf jaar nog te vervangen is.
-        </p>
-        <div id="hero-stats">
-          <div class="stat-cell">
-            <div class="stat-label">Modules</div>
-            <div class="stat-value">6</div>
+    <main id="top">
+      <section class="hero panel landingspage">
+        <div class="hero-copy reveal">
+          
+          <h1 class="hero-title">Waarom modulair ontwerp de toekomst is</h1>
+          <p class="hero-subtitle">
+            Waarom modulair werken? Waarom niet? Wanneer je laptop stuk is, is zelden het hele apparaat defect. Wat als je in plaats van een nieuw toestel te kopen, simpelweg het onderdeel ("module") kan vervangen? Dit is namelijk beter voor het milieu, want er is minder vraag naar schaarse materialen en het is ook nog eens beter voor de portemonnee. Waarom doen we dit dan niet al lang? Waarom blijven de bedrijven die dit zouden kunnen realiseren, op de achtergrond? Die vragen willen we hier beantwoorden.
+          </p>
+        </div>
+        <div class="hero-visual reveal">
+          <img class="hero-image" src="imgs/modulaire-laptop.png" alt="Exploded view van een modulaire laptop" />
+        </div>
+      </section>
+
+      <section class="overview-shell panel">
+        <div class="overview-grid">
+          <a class="overview-box" data-target="timeline-probleem" href="#timeline-probleem">
+            <span class="overview-step">Stap 1</span>
+            <h2 class="overview-title">Het probleem</h2>
+            <p class="overview-copy">Klik en spring naar het eerste deel van de tijdlijn.</p>
+          </a>
+          <a class="overview-box" data-target="timeline-oplossing" href="#timeline-oplossing">
+            <span class="overview-step">Stap 2</span>
+            <h2 class="overview-title">De oplossing</h2>
+            <p class="overview-copy">Klik en bekijk hoe modulair ontwerp een alternatief wordt.</p>
+          </a>
+          <a class="overview-box" data-target="timeline-impact" href="#timeline-impact">
+            <span class="overview-step">Stap 3</span>
+            <h2 class="overview-title">Economische Haalbaarheid</h2>
+            <p class="overview-copy">Klik en ga naar de maatschappelijke en ecologische impact.</p>
+          </a>
+        </div>
+      </section>
+
+      <div id="scroll-sentinel"></div>
+
+      <section class="story-timeline-section panel">
+        <div class="story-timeline-inner">
+          <div class="story-timeline-heading reveal">
+            <h2>Van vraag naar verdieping</h2>
+            <p>Gebruik eerst de boxen om naar de juiste stap te scrollen. Klik daarna op een tijdlijn-item om de volledige aparte pagina te openen.</p>
           </div>
-          <div class="stat-cell">
-            <div class="stat-label">iFixit Score</div>
-            <div class="stat-value">10 / 10</div>
-          </div>
-          <div class="stat-cell">
-            <div class="stat-label">Gewicht</div>
-            <div class="stat-value">1,3 kg</div>
+
+          <div class="story-timeline">
+            <a class="story-point reveal" id="timeline-probleem" data-target="timeline-probleem" data-tone="problem" href="probleem.html">
+              <span class="story-point-marker">1</span>
+              <span class="story-point-label">Pagina 1</span>
+              <h3 class="story-point-title">Het probleem</h3>
+              <p class="story-point-copy">Vastgesoldeerde onderdelen en moeilijke reparaties maken van kleine defecten al snel een reden om een volledig nieuw toestel te kopen.</p>
+              <span class="story-point-link">Lees meer</span>
+            </a>
+
+            <a class="story-point reveal" id="timeline-oplossing" data-target="timeline-oplossing" data-tone="solution" href="oplossing.html">
+              <span class="story-point-marker">2</span>
+              <span class="story-point-label">Pagina 2</span>
+              <h3 class="story-point-title">De oplossing</h3>
+              <p class="story-point-copy">Door het gebruik van een modulaire laptop, wordt onderhoud, upgrades en herstel veel eenvoudiger.</p>
+              <span class="story-point-link">Lees meer</span>
+            </a>
+
+            <a class="story-point reveal" id="timeline-impact" data-target="timeline-impact" data-tone="impact" href="impact.html">
+              <span class="story-point-marker">3</span>
+              <span class="story-point-label">Pagina 3</span>
+              <h3 class="story-point-title">Economische Haalbaarheid</h3>
+              <p class="story-point-copy">Een herstelbaar toestel zal langer meegaan. Er is minder nood aan schaarse materialen bevatten en hierdoor op termijn financieel interessanter zijn.</p>
+              <span class="story-point-link">Lees meer</span>
+            </a>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
 
-    <div id="hero-bar">
-      <div id="hero-bar-left">Model Nr. DOE–03 &nbsp;·&nbsp; Revisie 3.2 &nbsp;·&nbsp; Open Hardware</div>
-      <div id="hero-bar-right">
-        Scroll om te verkennen<div class="chevron"></div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Scroll sentinel: provides height for animation scrubbing -->
-  <div id="scroll-sentinel"></div>
-
-  <!-- ── MODULES SECTION ───────────────────────────────── -->
-  <section id="modules-section" class="panel">
-    <div id="section-head">
-      <span id="section-num">02 /</span>
-      <h2 id="section-title">De Modules</h2>
-      <p id="section-note">
-        Elk onderdeel is een volwaardig component — ontworpen om door jou
-        begrepen, onderhouden en vervangen te worden.
-      </p>
-    </div>
-
-    <div id="modules-grid">
-      <div class="module-card">
-        <div class="mod-num">MOD – 01</div>
-        <div class="mod-name">Processor</div>
-        <div class="mod-spec">Gesockelde LGA · AMD Ryzen AI of Intel Core Ultra · Vervangbaar in minder dan 4 minuten met bijgeleverde T5-schroevendraaier</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 02</div>
-        <div class="mod-name">Geheugen</div>
-        <div class="mod-spec">Standaard SO-DIMM slots · 16 – 64 GB · Dual channel · Geen lijm, geen solderen</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 03</div>
-        <div class="mod-name">Opslag</div>
-        <div class="mod-spec">Dubbele M.2 NVMe · PCIe Gen 4 · Optionele hot-swap beugel voor aangepaste configuraties</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 04</div>
-        <div class="mod-name">poorten</div>
-        <div class="mod-spec">Innovatief kliksysteem, geen breekijzer nodig · Keuze uit 15 verschillende verwisselbare poorten</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 05</div>
-        <div class="mod-name">Accu</div>
-        <div class="mod-spec">61 Wh · Gereedschapsvrij klikmechanisme · 1 000 volledige laadcycli · Apart leverbaar voor minimale uitvaltijd</div>
-        <div class="mod-status"><span class="status-dot"></span>Nu beschikbaar</div>
-      </div>
-      <div class="module-card">
-        <div class="mod-num">MOD – 06</div>
-        <div class="mod-name">Toetsenbord</div>
-        <div class="mod-spec">28 regionale indelingen · Click-swap mechanisme · Verlicht · Vloeistofgeleid chassis · Hot-swappable</div>
-        <div class="mod-status"><span class="status-dot soon"></span>Q3 2025</div>
-      </div>
-    </div>
-
-    <div id="cta-row">
-      <div id="cta-copy">Stel jouw DOE samen.</div>
-      <a href="#" id="cta-btn">
-        Begin met bouwen
-        <div id="cta-arrow"></div>
-      </a>
-    </div>
-  </section>
-
-  <footer id="footer" class="panel">
-    <div id="footer-brand">DOE<em>.</em></div>
-    <div id="footer-meta">© 2025 DOE Technology &nbsp;·&nbsp; Open Hardware Initiatief &nbsp;·&nbsp; Alle schema's gepubliceerd onder CERN OHL</div>
-  </footer>
+    <footer class="footer">
+      <span class="footer-left">Serry Nathan,Tack Ignace,Durnez Dolf,Gyselbrecht Stan</span>
+      <span class="footer-right">DUURZAAMHEID · ONDERNEMENSCHAP · ETHIEK</span>
+    </footer>
+  </div>
 
   <!-- Fixed animation display (behind .panel elements) -->
   <div id="frame-display">
     <img id="frame-img" alt="DOE Laptop" />
-    <div class="display-label" id="label-tl">DOE–03 · 3D Weergave</div>
-    <div class="display-label" id="label-tr">Frame <span id="frame-num">00</span> / 39</div>
-    <div class="display-label" id="label-br">Scroll om te draaien</div>
     <div id="scroll-hint">
       <div id="scroll-hint-text">scroll</div>
-      <div id="scroll-hint-bar"></div>
     </div>
   </div>
 
-  <script>
-    const FIRST            = 500;
-    const LAST             = 539;
-    const TOTAL            = LAST - FIRST + 1;   // 40
-    const PIXELS_PER_FRAME = 20;
-
-    // ── Sentinel height ──────────────────────────────────
-    const sentinel = document.getElementById('scroll-sentinel');
-    sentinel.style.height = (window.innerHeight + (TOTAL - 1) * PIXELS_PER_FRAME) + 'px';
-
-    // ── Preload ──────────────────────────────────────────
-    const frames       = new Array(TOTAL);
-    let   loadedCount  = 0;
-    const progressFill = document.getElementById('progress-bar-fill');
-    const loadingEl    = document.getElementById('loading');
-    const frameImg     = document.getElementById('frame-img');
-    const frameNumEl   = document.getElementById('frame-num');
-    const scrollHint   = document.getElementById('scroll-hint');
-
-    function onAllLoaded() {
-      updateFrame(0);
-      loadingEl.classList.add('hidden');
-      setTimeout(() => loadingEl.remove(), 800);
-    }
-
-    for (let i = 0; i < TOTAL; i++) {
-      const img = new Image();
-      img.src   = `./imgs/${String(FIRST + i).padStart(4, '0')}.png`;
-      frames[i] = img;
-      img.onload = img.onerror = () => {
-        loadedCount++;
-        progressFill.style.width = (loadedCount / TOTAL * 100) + '%';
-        if (loadedCount === TOTAL) onAllLoaded();
-      };
-    }
-
-    // ── Scroll → frame ───────────────────────────────────
-    let rafPending = false;
-    let currentIdx = -1;
-
-    function updateFrame(index) {
-      if (index === currentIdx) return;
-      currentIdx = index;
-      frameImg.src = frames[index].src;
-      frameNumEl.textContent = String(index).padStart(2, '0');
-    }
-
-    function onScroll() {
-      if (rafPending) return;
-      rafPending = true;
-      requestAnimationFrame(() => {
-        rafPending = false;
-        const into     = window.scrollY - sentinel.offsetTop;
-        const max      = (TOTAL - 1) * PIXELS_PER_FRAME;
-        const progress = Math.min(Math.max(into / max, 0), 1);
-        updateFrame(Math.min(Math.floor(progress * TOTAL), TOTAL - 1));
-        if (into > 20) scrollHint.classList.add('hidden');
-        else           scrollHint.classList.remove('hidden');
-      });
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', () => {
-      sentinel.style.height = (window.innerHeight + (TOTAL - 1) * PIXELS_PER_FRAME) + 'px';
-      onScroll();
-    });
-
-    // ── Module entrance animations ────────────────────────
-    const cards    = document.querySelectorAll('.module-card');
-    const cardList = Array.from(cards);
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const i = cardList.indexOf(entry.target);
-          setTimeout(() => entry.target.classList.add('visible'), i * 55);
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.08 });
-    cards.forEach(c => io.observe(c));
-  </script>
-
+  <script src="main.js"></script>
 </body>
 </html>
