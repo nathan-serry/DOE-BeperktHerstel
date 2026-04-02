@@ -535,6 +535,23 @@ a {
     display: block;
 }
 
+.img-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: center;
+}
+
+.side-img {
+    width: 100%;
+    height: auto;
+    max-height: 20rem;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    opacity: 0.98;
+    filter: drop-shadow(0 24px 30px rgba(22, 18, 12, 0.05));
+}
+
 @keyframes drift {
     0%, 100% { transform: scaleX(0.8); opacity: 0.55; }
     50% { transform: scaleX(1); opacity: 1; }
@@ -634,21 +651,7 @@ a {
     }
 
     .img-side {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
-        align-items: center;
-    }
-
-    @media (max-width: 768px) {
-        .img-side {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .hero-image {
-        width: 100%;
-        height: auto;
+        grid-template-columns: 1fr;
     }
 
 }
