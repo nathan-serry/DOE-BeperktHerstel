@@ -632,6 +632,25 @@ a {
         height: 36px;
         font-size: 0.88rem;
     }
+
+    .img-side {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+        .img-side {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .hero-image {
+        width: 100%;
+        height: auto;
+    }
+
 }
 
 
