@@ -477,6 +477,8 @@ a {
     letter-spacing: 0.12em;
     border-top: 1px solid var(--line);
     background-color: var(--bg);
+    position: relative;
+    z-index: 10;
 }
 
 /* Scroll hint */
