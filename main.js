@@ -1,121 +1,95 @@
-window.addEventListener('DOMContentLoaded', function(e){
+window.addEventListener('DOMContentLoaded', () => {
+    // ── Constants ────────────────────────────────────────────────
+    const FIRST = 500;
+    const LAST = 539;
+    const TOTAL = LAST - FIRST + 1;
+    const PIXELS_PER_FRAME = 20;
+    const REVEAL_THRESHOLD = 0.14;
+    const CARD_THRESHOLD = 0.08;
+    const CARD_DELAY = 55;
+    const ANIMATION_START_OFFSET = 350;
 
-    const storyPoints = Array.from(document.querySelectorAll(".story-point"));
-    const revealItems = Array.from(document.querySelectorAll(".reveal"));
-    const topOffset = () => {
-        const navHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--nav-height")) || 82;
-        return navHeight + 24;
-    };
+    // ── DOM Elements ───────────────────────────────────────────────
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-    let pendingTargetId = null;
-    let pendingTargetY = null;
+    const storyPoints = $$('.story-point');
+    const revealItems = $$('.reveal');
+    const cardList = $$('.module-card');
+    const sentinel = $('#scroll-sentinel');
+    const progressFill = $('#progress-bar-fill');
+    const frameImg = $('#frame-img');
+    const scrollHint = $('#scroll-hint');
+
+    // ── Navigation ────────────────────────────────────────────────
+    let navHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 82;
+    let topOffset = navHeight + 24;
 
     function setActiveTarget(id) {
-        storyPoints.forEach((point) => {
-            point.classList.toggle("is-active", point.dataset.target === id);
-        });
-    }
-
-    function scrollToTarget(id) {
-        const target = document.getElementById(id);
-        if (!target) return;
-
-        pendingTargetId = id;
-        pendingTargetY = Math.max(target.getBoundingClientRect().top + window.scrollY - topOffset(), 0);
-        setActiveTarget(id);
-
-        window.scrollTo({
-            top: pendingTargetY,
-            behavior: "smooth"
+        storyPoints.forEach(point => {
+            point.classList.toggle('is-active', point.dataset.target === id);
         });
     }
 
     function updateActiveFromScroll() {
-        if (pendingTargetId) return;
-
-        const focusY = topOffset() + 24;
+        const focusY = topOffset + 24;
         let closestPoint = null;
-        let closestDistance = Number.POSITIVE_INFINITY;
+        let closestDistance = Infinity;
 
-        storyPoints.forEach((point) => {
-            const rect = point.getBoundingClientRect();
-            const distance = Math.abs(rect.top - focusY);
-
+        for (const point of storyPoints) {
+            const distance = Math.abs(point.getBoundingClientRect().top - focusY);
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closestPoint = point;
             }
-        });
-
-        if (closestPoint) {
-            setActiveTarget(closestPoint.id);
         }
+
+        if (closestPoint) setActiveTarget(closestPoint.id);
     }
 
-    const revealObserver = new IntersectionObserver(
-        (entries, observer) => {
-            entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                entry.target.classList.add("is-visible");
-                observer.unobserve(entry.target);
-            });
-        },
-        {
-            threshold: 0.14
+    // ── Reveal Observer ───────────────────────────────────────────
+    const revealObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                revealObserver.unobserve(entry.target);
+            }
         }
-    );
+    }, { threshold: REVEAL_THRESHOLD });
 
-    revealItems.forEach((item) => revealObserver.observe(item));
-    window.addEventListener("scroll", () => {
-        if (pendingTargetId && pendingTargetY !== null && Math.abs(window.scrollY - pendingTargetY) < 8) {
-            setActiveTarget(pendingTargetId);
-            pendingTargetId = null;
-            pendingTargetY = null;
-            return;
-        }
+    revealItems.forEach(item => revealObserver.observe(item));
 
+    // ── Scroll Handler ──────────────────────────────────────────────
+    window.addEventListener('scroll', () => {
         const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 8;
-        if (atBottom && !pendingTargetId) {
-            setActiveTarget("timeline-impact");
+        if (atBottom) {
+            setActiveTarget('timeline-impact');
             return;
         }
 
         updateActiveFromScroll();
     }, { passive: true });
 
-    setActiveTarget("timeline-probleem");
+    setActiveTarget('timeline-probleem');
     updateActiveFromScroll();
 
-    const FIRST            = 500;
-    const LAST             = 539;
-    const TOTAL            = LAST - FIRST + 1;   // 40
-    const PIXELS_PER_FRAME = 20;
+    // ── Frame Animation ─────────────────────────────────────────────
+    sentinel.style.height = `${window.innerHeight + (TOTAL - 1) * PIXELS_PER_FRAME - 1.4*ANIMATION_START_OFFSET}px`;
 
-// ── Sentinel height ──────────────────────────────────
-
-    const sentinel = document.getElementById('scroll-sentinel');
-    sentinel.style.height = (window.innerHeight + (TOTAL - 1) * PIXELS_PER_FRAME) + 'px';
-
-// ── Preload ──────────────────────────────────────────
-    const frames       = new Array(TOTAL);
-    let   loadedCount  = 0;
-    const progressFill = document.getElementById('progress-bar-fill');
-    const frameImg     = document.getElementById('frame-img');
-    const scrollHint   = document.getElementById('scroll-hint');
+    const frames = new Array(TOTAL);
+    let loadedCount = 0;
+    let currentIdx = -1;
+    let rafPending = false;
 
     for (let i = 0; i < TOTAL; i++) {
         const img = new Image();
-        img.src   = `./imgs/${String(FIRST + i).padStart(4, '0')}.png`;
+        img.src = `./imgs/${String(FIRST + i).padStart(4, '0')}.png`;
         frames[i] = img;
         img.onload = img.onerror = () => {
             loadedCount++;
-            progressFill.style.width = (loadedCount / TOTAL * 100) + '%';
+            progressFill.style.width = `${(loadedCount / TOTAL) * 100}%`;
         };
     }
-
-// ── Scroll → frame ───────────────────────────────────
-    let rafPending = false;
-    let currentIdx = -1;
 
     function updateFrame(index) {
         if (index === currentIdx) return;
@@ -128,8 +102,8 @@ window.addEventListener('DOMContentLoaded', function(e){
         rafPending = true;
         requestAnimationFrame(() => {
             rafPending = false;
-            const into     = window.scrollY - sentinel.offsetTop;
-            const max      = (TOTAL - 1) * PIXELS_PER_FRAME;
+            const into = window.scrollY - sentinel.offsetTop + ANIMATION_START_OFFSET;
+            const max = (TOTAL - 1) * PIXELS_PER_FRAME;
             const progress = Math.min(Math.max(into / max, 0), 1);
             updateFrame(Math.min(Math.floor(progress * TOTAL), TOTAL - 1));
             scrollHint.classList.toggle('hidden', into > 20);
@@ -138,23 +112,20 @@ window.addEventListener('DOMContentLoaded', function(e){
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', () => {
-        sentinel.style.height = (window.innerHeight + (TOTAL - 1) * PIXELS_PER_FRAME) + 'px';
+        sentinel.style.height = `${window.innerHeight + (TOTAL - 1) * PIXELS_PER_FRAME + ANIMATION_START_OFFSET}px`;
         onScroll();
     });
 
-// ── Module entrance animations ────────────────────────
-    const cardList = Array.from(document.querySelectorAll('.module-card'));
+    // ── Card Animations ────────────────────────────────────────────
     const cardIndexMap = new Map(cardList.map((c, i) => [c, i]));
-    const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
+    const cardObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
             if (entry.isIntersecting) {
-                setTimeout(() => entry.target.classList.add('visible'), cardIndexMap.get(entry.target) * 55);
-                io.unobserve(entry.target);
+                setTimeout(() => entry.target.classList.add('visible'), cardIndexMap.get(entry.target) * CARD_DELAY);
+                cardObserver.unobserve(entry.target);
             }
-        });
-    }, { threshold: 0.08 });
-    cardList.forEach(c => io.observe(c));
+        }
+    }, { threshold: CARD_THRESHOLD });
 
+    cardList.forEach(card => cardObserver.observe(card));
 });
-
-
